@@ -11,8 +11,6 @@ import {Provider} from 'react-redux'
 import store from './store'
 import routes from './routes'
 
-console.log("Now at ",store.getState())
-
 ReactDOM.render(
 	// The top-level Provider is what allows us to `connect` components to the store
 	// using ReactRedux.connect (see components Home and Hero)

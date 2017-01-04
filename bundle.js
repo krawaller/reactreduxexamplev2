@@ -76,8 +76,6 @@
 	then use React and React-DOM to render it.
 	*/
 	
-	console.log("Now at ", _store2.default.getState());
-	
 	_reactDom2.default.render(
 	// The top-level Provider is what allows us to `connect` components to the store
 	// using ReactRedux.connect (see components Home and Hero)
@@ -30186,6 +30184,9 @@
 		RESET: "RESET",
 		DUCK_DOWN: "DUCK_DOWN",
 		STAND_UP: "STAND_UP",
+		TWITCH_FINGER: "TWITCH_FINGER",
+		MISS_SHOT: "MISS_SHOT",
+		BLAST_CORPSE: "BLAST_CORPSE",
 	
 		// HERO STATUSES
 		AIMING: "AIMING",
@@ -34047,31 +34048,28 @@
 				newstate.doing[action.killer] = _constants2.default.AIMING;
 				newstate.log.push(action.killer + " takes aim at " + action.victim + "!");
 				return newstate;
+			case _constants2.default.TWITCH_FINGER:
+				newstate.log.push("The trigger finger twitches on " + action.who + "'s corpse");
+				return newstate;
+			case _constants2.default.MISS_SHOT:
+				newstate.doing[action.killer] = _constants2.default.WAITING;
+				newstate.log.push(action.victim + " dodges a blast from " + action.killer + "!");
+				return newstate;
+			case _constants2.default.BLAST_CORPSE:
+				newstate.doing[action.killer] = _constants2.default.WAITING;
+				newstate.log.push(action.killer + " blasts " + action.victim + "'s corpse.");
+				return newstate;
 			case _constants2.default.KILL_HERO:
-				// the shooter has died before he got the shot off
-				if (state.doing[action.killer] === _constants2.default.DEAD) {
-					newstate.log.push("The trigger finger twitches on " + action.killer + "'s corpse");
+				if (state.doing[action.victim] === _constants2.default.AIMING) {
+					newstate.log.push(action.killer + " killed " + action.victim + " before he got his shot off!");
 				} else {
-					newstate.doing[action.killer] = _constants2.default.WAITING; // whatever happens we should no longer be aiming
-					// the target is ducking
-					if (state.doing[action.victim] === _constants2.default.DUCKING) {
-						newstate.log.push(action.victim + " dodges a blast from " + action.killer + "!");
-						// the target has already been killed
-					} else if (state.doing[action.victim] === _constants2.default.DEAD) {
-						newstate.log.push(action.killer + " blasts " + action.victim + "'s corpse.");
-						// we kill the target!
-					} else {
-						if (state.doing[action.victim] === _constants2.default.AIMING) {
-							newstate.log.push(action.killer + " killed " + action.victim + " before he got his shot off!");
-						} else {
-							newstate.log.push(action.killer + " killed " + action.victim + "!");
-						}
-						newstate.doing[action.victim] = _constants2.default.DEAD;
-						newstate.standing = newstate.standing - 1;
-						if (newstate.standing === 1) {
-							newstate.log.push(action.killer + " WINS!!");
-						}
-					}
+					newstate.log.push(action.killer + " killed " + action.victim + "!");
+				}
+				newstate.doing[action.victim] = _constants2.default.DEAD;
+				newstate.doing[action.killer] = _constants2.default.WAITING;
+				newstate.standing = newstate.standing - 1;
+				if (newstate.standing === 1) {
+					newstate.log.push(action.killer + " WINS!!");
 				}
 				return newstate;
 			default:
@@ -34522,7 +34520,22 @@
 			return function (dispatch, getState) {
 				dispatch({ type: _constants2.default.AIM_AT, killer: killer, victim: victim });
 				setTimeout(function () {
-					return dispatch({ type: _constants2.default.KILL_HERO, killer: killer, victim: victim });
+					var state = getState().battlefield;
+					// This branching was previously done in the reducer, now instead moved to here!
+					if (state.doing[killer] === _constants2.default.DEAD) {
+						dispatch({ type: _constants2.default.TWITCH_FINGER, who: killer });
+					} else {
+						// the target is ducking
+						if (state.doing[victim] === _constants2.default.DUCKING) {
+							dispatch({ type: _constants2.default.MISS_SHOT, killer: killer, victim: victim });
+							// the target has already been killed
+						} else if (state.doing[victim] === _constants2.default.DEAD) {
+							dispatch({ type: _constants2.default.BLAST_CORPSE, killer: killer, victim: victim });
+							// we kill the target!
+						} else {
+							dispatch({ type: _constants2.default.KILL_HERO, killer: killer, victim: victim });
+						}
+					}
 				}, 2000);
 			};
 		}

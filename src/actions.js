@@ -17,7 +17,7 @@ const actionCreators = {
 		return (dispatch,getState)=> {
 			dispatch({type:C.DUCK_DOWN,coward:who});
 			setTimeout(
-				()=>dispatch({type:C.STAND_UP,coward:who}),
+				()=> dispatch({type:C.STAND_UP,coward:who}),
 				2000
 			);
 		}
@@ -27,7 +27,24 @@ const actionCreators = {
 		return (dispatch,getState)=> {
 			dispatch({type:C.AIM_AT,killer:killer,victim:victim});
 			setTimeout(
-				()=>dispatch({type:C.KILL_HERO,killer:killer,victim:victim}),
+				()=> {
+					const state = getState().battlefield;
+					// This branching was previously done in the reducer, now instead moved to here!
+					if (state.doing[killer] === C.DEAD){
+						dispatch({type:C.TWITCH_FINGER, who: killer});
+					} else {
+						// the target is ducking
+						if (state.doing[victim] === C.DUCKING) {
+							dispatch({type:C.MISS_SHOT, killer, victim});
+						// the target has already been killed
+						} else if (state.doing[victim] === C.DEAD) {
+							dispatch({type:C.BLAST_CORPSE, killer, victim});
+						// we kill the target!
+						} else {
+							dispatch({type:C.KILL_HERO,killer,victim});
+						}
+					}
+				},
 				2000
 			);
 		};
