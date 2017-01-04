@@ -2,7 +2,7 @@
 This file contains all constants in the app.
 */
 
-module.exports = {
+const C = {
 	// ACTION TYPES
 	AIM_AT: "AIM_AT",
 	KILL_HERO: "KILL_HERO",
@@ -16,3 +16,5 @@ module.exports = {
 	WAITING: "WAITING",
 	DEAD: "DEAD"
 };
+
+export default C;

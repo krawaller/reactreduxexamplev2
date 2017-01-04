@@ -1,11 +1,13 @@
-var React = require("react"),
-	ptypes = React.PropTypes,
-	ReactRedux = require("react-redux"),
-	Log = require("./log"),
-	Battlers = require("./battlers"),
-	actions = require("../actions");
+import React from 'react'
+const ptypes = React.PropTypes
 
-var Home = React.createClass({
+import actionCreators from '../actions'
+import {connect} from 'react-redux'
+
+import Log from './log'
+import Battlers from './battlers'
+
+const Home = React.createClass({
 	propTypes: {
 		// redux store state, imported below
 		battle: ptypes.shape({ 
@@ -17,8 +19,8 @@ var Home = React.createClass({
 		duck: ptypes.func.isRequired,
 		reset: ptypes.func.isRequired
 	},
-	render: function(){
-		var battleprops = this.props.battle;
+	render(){
+		let battleprops = this.props.battle;
 		return (
 			<div>
 				<Battlers doing={battleprops.doing} kill={this.props.kill} duck={this.props.duck} />
@@ -31,17 +33,13 @@ var Home = React.createClass({
 
 // now we connect the component to the Redux store:
 
-var mapStateToProps = function(state){
 	// This component will have access to `state.battlefield` through `this.props.battle`
-	return {battle:state.battlefield};
-};
+const mapAppStateToProps = (state)=> ({battle:state.battlefield});
 
-var mapDispatchToProps = function(dispatch){
-	return {
-		kill: function(killer,victim){ dispatch(actions.aimAt(killer,victim)); },
-		duck: function(coward){ dispatch(actions.duckDown(coward)); },
-		reset: function(){ dispatch(actions.reset()); }
-	}
-};
+const mapDispatchToProps = (dispatch)=> ({
+	kill: (killer,victim)=> dispatch(actionCreators.aimAt(killer,victim)),
+	duck: (coward)=> dispatch(actionCreators.duckDown(coward)),
+	reset: ()=> dispatch(actionCreators.reset())
+});
 
-module.exports = ReactRedux.connect(mapStateToProps,mapDispatchToProps)(Home);
+export default connect(mapAppStateToProps,mapDispatchToProps)(Home);

@@ -3,17 +3,13 @@ This is our top-level component. Sub-components matching specific routes will be
 contained in `this.props.children` and rendered out.
 */
 
-var React = require('react');
+import React from 'react'
 
-var Wrapper = React.createClass({
-    render: function() {
-        return (
-            <div className="wrapper">
-                <h2>Superhero battle arena 2000!</h2>
-                {this.props.children}
-            </div>
-        );
-    }
-});
+const Wrapper = (props)=> (
+  <div className="wrapper">
+    <h2>Superhero battle arena 2000!</h2>
+    {props.children}
+  </div>
+);
 
-module.exports = Wrapper;
+export default Wrapper;
